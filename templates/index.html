@@ -57,11 +57,12 @@
   </div>
 
   <!-- Background ambience -->
-  <audio id="bg-ambience" loop autoplay>
+  <audio id="bg-ambience" autoplay loop>
     <source src="/static/sfx/ghost-ambience.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
   </audio>
 
-  <!-- Creepy sound effects -->
+  <!-- Sound effects -->
   <audio id="whisper-sound">
     <source src="/static/sfx/whisper.mp3" type="audio/mpeg">
   </audio>
@@ -75,18 +76,17 @@
   </audio>
 
   <script>
-    function playSoundEffect(type) {
-      const sounds = {
-        "*whispers*": document.getElementById("whisper-sound"),
-        "*giggles*": document.getElementById("giggle-sound"),
-        "*chuckles*": document.getElementById("chuckle-sound")
-      };
-
-      Object.keys(sounds).forEach(keyword => {
-        if (type.includes(keyword)) {
-          sounds[keyword].play();
-        }
-      });
+    function playSoundEffect(replyText) {
+      const lower = replyText.toLowerCase();
+      if (lower.includes("whisper")) {
+        document.getElementById("whisper-sound").play();
+      }
+      if (lower.includes("giggle")) {
+        document.getElementById("giggle-sound").play();
+      }
+      if (lower.includes("chuckle")) {
+        document.getElementById("chuckle-sound").play();
+      }
     }
 
     async function askGhost() {
@@ -97,27 +97,31 @@
       try {
         const response = await fetch("/", {
           method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
           body: `prompt=${encodeURIComponent(input)}`
         });
 
         const data = await response.text();
         responseDiv.innerText = data;
-
-        playSoundEffect(data.toLowerCase());
+        playSoundEffect(data);
 
       } catch (error) {
-        responseDiv.innerText = "👻 The ghost has vanished... Try again later.";
+        responseDiv.innerText = "👻 The ghost encountered an error.";
         console.error(error);
       }
     }
 
-    // Auto-play ambience when page loads
-    window.onload = () => {
+    // Play background ambience on load
+    window.onload = function () {
       const bg = document.getElementById("bg-ambience");
       bg.volume = 0.4;
-      bg.play();
+      bg.play().catch(err => {
+        console.warn("Autoplay failed:", err);
+      });
     };
   </script>
 </body>
 </html>
+
