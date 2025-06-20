@@ -1,1 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ghostly AI 👻</title>
+  <style>
+    body {
+      background-image: url("/static/ghost-bg.jpg");
+      background-size: cover;
+      background-position: center;
+      background-color: black;
+      color: white;
+      font-family: 'Courier New', Courier, monospace;
+      text-align: center;
+      padding-top: 50px;
+    }
+
+    .chat-box {
+      max-width: 600px;
+      margin: 0 auto;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 30px;
+      border-radius: 15px;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      width: 75%;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: crimson;
+      border: none;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #ghost-reply {
+      margin-top: 20px;
+      font-size: 18px;
+      white-space: pre-wrap;
+    }
+
+    audio {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="chat-box">
+    <h1>👻 Ghostly AI</h1>
+    <input type="text" id="userInput" placeholder="Ask something creepy...">
+    <button onclick="askGhost()">Summon</button>
+    <div id="ghost-reply"></div>
+  </div>
+
+  <!-- Background ambience -->
+  <audio id="bg-ambience" autoplay loop>
+    <source src="/static/sfx/ghost-ambience.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Sound effects -->
+  <audio id="whisper"><source src="/static/sfx/whisper.mp3" type="audio/mpeg"></audio>
+  <audio id="giggle"><source src="/static/sfx/giggle.mp3" type="audio/mpeg"></audio>
+  <audio id="chuckle"><source src="/static/sfx/chuckle.mp3" type="audio/mpeg"></audio>
+
+  <script>
+    async function askGhost() {
+      const prompt = document.getElementById("userInput").value;
+      const responseDiv = document.getElementById("ghost-reply");
+      responseDiv.innerText = "👻 Summoning...";
+
+      try {
+        const res = await fetch("/", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `prompt=${encodeURIComponent(prompt)}`
+        });
+        const text = await res.text();
+        responseDiv.innerText = text;
+        playSFX(text.toLowerCase());
+        speakGhost(text);
+      } catch (e) {
+        responseDiv.innerText = "👻 The ghost vanished... try again.";
+      }
+    }
+
+    function speakGhost(text) {
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.pitch = 0.4;
+      utter.rate = 0.8;
+      utter.volume = 1;
+      speechSynthesis.speak(utter);
+    }
+
+    function playSFX(text) {
+      if (text.includes("whisper")) document.getElementById("whisper").play();
+      if (text.includes("giggle")) document.getElementById("giggle").play();
+      if (text.includes("chuckle")) document.getElementById("chuckle").play();
+    }
+
+    window.onload = () => {
+      const bg = document.getElementById("bg-ambience");
+      bg.volume = 0.3;
+      bg.play();
+    };
+  </script>
+
+</body>
+</html>
 
